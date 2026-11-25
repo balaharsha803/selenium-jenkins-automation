@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'JDK17'
+        maven 'Maven3'
+    }
+
+    environment {
+        BASE_URL = 'http://127.0.0.1:8080'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Start Demo Application') {
+            steps {
+                sh '''
+                    (cd src/test/resources/webapp && python3 -m http.server 8080 > ../../../../webapp.log 2>&1 &)
+                    sleep 3
+                    curl --fail "$BASE_URL" > /dev/null
+                '''
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                sh 'mvn -B clean test -DbaseUrl=$BASE_URL -Dbrowser=chrome'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'target/screenshots/**, target/surefire-reports/**, webapp.log',
+                             allowEmptyArchive: true
+        }
+        success {
+            echo 'All configured Selenium tests passed.'
+        }
+        failure {
+            echo 'Build or automated test failed. Review the published reports and screenshots.'
+        }
+    }
+}

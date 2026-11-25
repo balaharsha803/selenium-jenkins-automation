@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Selenium Regression Suite" verbose="1">
+  <test name="Web application tests">
+    <classes>
+      <class name="com.devops.tests.LoginTests"/>
+      <class name="com.devops.tests.FormValidationTests"/>
+      <class name="com.devops.tests.NavigationTests"/>
+    </classes>
+  </test>
+</suite>
